@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>💊 Suplementy — Tracker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #0a0b0f;
+    --card: #141620;
+    --card-hover: #1a1d2a;
+    --border: #1e2130;
+    --text: #e8e8ec;
+    --muted: #6b7084;
+    --green: #2dd4a0;
+    --green-bg: rgba(45,212,160,0.08);
+    --green-border: rgba(45,212,160,0.2);
+    --blue: #5b8af5;
+    --blue-bg: rgba(91,138,245,0.08);
+    --orange: #f5a524;
+    --orange-bg: rgba(245,165,36,0.08);
+    --purple: #a78bfa;
+    --purple-bg: rgba(167,139,250,0.08);
+    --red: #f87171;
+    --red-bg: rgba(248,113,113,0.08);
+    --checked-text: #4a4d5e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 100px 0;
+    overflow-x: hidden;
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,11,15,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  .header .date {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .progress-bar {
+    margin-top: 12px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  .progress-text .count {
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .section {
+    margin: 16px 16px 0;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 4px 10px;
+  }
+
+  .section-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .section-icon.rano { background: var(--orange-bg); }
+  .section-icon.dzien { background: var(--blue-bg); }
+  .section-icon.wieczor { background: var(--purple-bg); }
+  .section-icon.sen { background: var(--green-bg); }
+
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .section-hint {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-top: 1px;
+  }
+
+  .items {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .item:last-child { border-bottom: none; }
+
+  .item:active {
+    background: var(--card-hover);
+  }
+
+  .item.checked {
+    opacity: 1;
+  }
+
+  .item.checked .item-name {
+    color: var(--checked-text);
+    text-decoration: line-through;
+    text-decoration-color: var(--checked-text);
+  }
+
+  .item.checked .item-detail {
+    color: var(--checked-text);
+  }
+
+  .checkbox {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .item.checked .checkbox {
+    background: var(--green);
+    border-color: var(--green);
+    animation: checkPop 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes checkPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .checkbox svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: all 0.2s ease;
+  }
+
+  .item.checked .checkbox svg {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .item-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .item-name {
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    line-height: 1.3;
+  }
+
+  .item-detail {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    transition: all 0.2s ease;
+    line-height: 1.3;
+  }
+
+  .item-time {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 500;
+    background: rgba(255,255,255,0.04);
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .item.checked .item-time {
+    opacity: 0.3;
+  }
+
+  .warning-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--orange);
+    background: var(--orange-bg);
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .reset-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(10,11,15,0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    padding: 14px 20px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn-reset {
+    background: var(--card);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .btn-all {
+    background: linear-gradient(135deg, var(--green), #20b890);
+    color: #0a0b0f;
+  }
+
+  .streak-badge {
+    text-align: center;
+    padding: 16px;
+    margin: 16px 16px 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .streak-badge strong {
+    color: var(--green);
+    font-size: 15px;
+  }
+
+  .note {
+    margin: 12px 16px;
+    padding: 10px 14px;
+    background: var(--red-bg);
+    border: 1px solid rgba(248,113,113,0.15);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--red);
+    line-height: 1.5;
+  }
+
+  .note.info {
+    background: var(--blue-bg);
+    border-color: rgba(91,138,245,0.15);
+    color: var(--blue);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>💊 Suplementy</h1>
+    <div class="date" id="currentDate"></div>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+  <div class="progress-text">
+    <span>Postęp dnia</span>
+    <span class="count" id="progressCount">0 / 0</span>
+  </div>
+</div>
+
+<div class="note info">
+  ⏰ Melatonina: max 5-7 dni ciągiem, potem przerwa. NAC nie łączyć z wit. C w tej samej porze.
+</div>
+
+<!-- RANO -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon rano">☀️</div>
+    <div>
+      <div class="section-title">Rano</div>
+      <div class="section-hint">z pierwszym posiłkiem / kawą</div>
+    </div>
+  </div>
+  <div class="items" id="group-rano">
+    <div class="item" data-id="cynk" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Cynk</div>
+      </div>
+    </div>
+    <div class="item" data-id="d3" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Witamina D3</div>
+        <div class="item-detail">4000 IU · z tłuszczem</div>
+      </div>
+    </div>
+    <div class="item" data-id="lionsmane" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Lion's Mane</div>
+      </div>
+    </div>
+    <div class="item" data-id="tyrozyna" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">L-Tyrozyna</div>
+        <div class="item-detail">nie na pusty żołądek</div>
+      </div>
+    </div>
+    <div class="item" data-id="teanina-rano" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">L-Teanina</div>
+        <div class="item-detail">z kawą</div>
+      </div>
+    </div>
+    <div class="item" data-id="kreatyna" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Kreatyna</div>
+        <div class="item-detail">5g</div>
+      </div>
+    </div>
+    <div class="item" data-id="nac" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">NAC 600mg</div>
+        <div class="item-detail">z selenem · z jedzeniem<span class="warning-badge">≠ wit. C</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- W CIĄGU DNIA -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon dzien">🕐</div>
+    <div>
+      <div class="section-title">W ciągu dnia</div>
+      <div class="section-hint">z posiłkami, przed 14:00 kawa</div>
+    </div>
+  </div>
+  <div class="items" id="group-dzien">
+    <div class="item" data-id="berberyna1" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Berberyna #1</div>
+        <div class="item-detail">500mg · przed posiłkiem</div>
+      </div>
+    </div>
+    <div class="item" data-id="berberyna2" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Berberyna #2</div>
+        <div class="item-detail">500mg · przed posiłkiem</div>
+      </div>
+    </div>
+    <div class="item" data-id="debutir" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Debutir Forte</div>
+      </div>
+    </div>
+    <div class="item" data-id="vitc" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Witamina C</div>
+        <div class="item-detail">inna pora niż NAC<span class="warning-badge">≠ NAC</span></div>
+      </div>
+    </div>
+    <div class="item" data-id="sanprobi" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Sanprobi Barrier</div>
+        <div class="item-detail">probiotyk · codziennie obowiązkowo</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WIECZOREM -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon wieczor">🌆</div>
+    <div>
+      <div class="section-title">Wieczorem</div>
+      <div class="section-hint">z kolacją</div>
+    </div>
+  </div>
+  <div class="items" id="group-wieczor">
+    <div class="item" data-id="omega3" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Omega-3</div>
+      </div>
+    </div>
+    <div class="item" data-id="magnez" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Magnesium Breakthrough</div>
+        <div class="item-detail">pół miarki · proszek z kolacją</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRZED SNEM -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-icon sen">🌙</div>
+    <div>
+      <div class="section-title">Przed snem</div>
+      <div class="section-hint">23:00–23:15</div>
+    </div>
+  </div>
+  <div class="items" id="group-sen">
+    <div class="item" data-id="teanina-noc" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">L-Teanina</div>
+        <div class="item-detail">100mg · druga dawka wieczorna</div>
+      </div>
+    </div>
+    <div class="item" data-id="melatonina" onclick="toggle(this)">
+      <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+      <div class="item-content">
+        <div class="item-name">Melatonina</div>
+        <div class="item-detail">1mg · max 5-7 dni, potem przerwa</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="streak-badge" id="streakBadge">
+  Odklikuj wszystko — Twoje jelita i sen Ci podziękują 💪
+</div>
+
+<!-- Bottom bar -->
+<div class="reset-bar">
+  <button class="btn btn-reset" onclick="resetAll()">Reset dnia</button>
+  <button class="btn btn-all" onclick="checkAll()">Wszystko ✓</button>
+</div>
+
+<script>
+  // Date display
+  const days = ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
+  const months = ['stycznia','lutego','marca','kwietnia','maja','czerwca','lipca','sierpnia','września','października','listopada','grudnia'];
+  const now = new Date();
+  document.getElementById('currentDate').textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+
+  // State
+  const STORAGE_KEY = 'supl_' + now.toISOString().slice(0,10);
+
+  function loadState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const state = JSON.parse(saved);
+        document.querySelectorAll('.item').forEach(item => {
+          if (state[item.dataset.id]) {
+            item.classList.add('checked');
+          }
+        });
+      }
+    } catch(e) {}
+    updateProgress();
+  }
+
+  function saveState() {
+    try {
+      const state = {};
+      document.querySelectorAll('.item').forEach(item => {
+        state[item.dataset.id] = item.classList.contains('checked');
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch(e) {}
+  }
+
+  function toggle(el) {
+    el.classList.toggle('checked');
+    saveState();
+    updateProgress();
+
+    // Haptic feedback if available
+    if (navigator.vibrate) navigator.vibrate(10);
+  }
+
+  function resetAll() {
+    if (confirm('Zresetować wszystko na dziś?')) {
+      document.querySelectorAll('.item').forEach(item => {
+        item.classList.remove('checked');
+      });
+      saveState();
+      updateProgress();
+    }
+  }
+
+  function checkAll() {
+    document.querySelectorAll('.item').forEach(item => {
+      item.classList.add('checked');
+    });
+    saveState();
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const all = document.querySelectorAll('.item');
+    const checked = document.querySelectorAll('.item.checked');
+    const pct = all.length > 0 ? (checked.length / all.length) * 100 : 0;
+
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressCount').textContent = `${checked.length} / ${all.length}`;
+
+    const badge = document.getElementById('streakBadge');
+    if (checked.length === all.length) {
+      badge.innerHTML = '🏆 <strong>Komplet na dziś!</strong> Wszystkie suplementy wzięte.';
+    } else if (checked.length > all.length * 0.5) {
+      badge.innerHTML = `Jeszcze <strong>${all.length - checked.length}</strong> do kompletu — dokończ!`;
+    } else {
+      badge.innerHTML = 'Odklikuj wszystko — Twoje jelita i sen Ci podziękują 💪';
+    }
+  }
+
+  // Auto-reset at midnight
+  function checkDayReset() {
+    const today = new Date().toISOString().slice(0,10);
+    const key = 'supl_' + today;
+    if (key !== STORAGE_KEY) {
+      location.reload();
+    }
+  }
+  setInterval(checkDayReset, 60000);
+
+  // Init
+  loadState();
+</script>
+
+</body>
+</html>

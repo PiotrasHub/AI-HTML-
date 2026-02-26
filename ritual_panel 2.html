@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Rytuał — Piotr Triathlon</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #12151c;
+    --surface2: #1a1e28;
+    --border: #252a36;
+    --accent: #e84855;
+    --accent2: #3d9be9;
+    --accent3: #2ecb71;
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .date-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .progress-bar-wrap {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  /* MAIN */
+  .main { padding: 16px 16px 0; }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 16px;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-weight: 700;
+    font-size: 14px;
+    flex: 1;
+    letter-spacing: 0.5px;
+  }
+
+  .section-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .section-chevron {
+    color: var(--text-muted);
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+
+  .section.collapsed .section-chevron { transform: rotate(-90deg); }
+  .section.collapsed .section-body { display: none; }
+
+  .section-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  /* EXERCISE CARD */
+  .exercise-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .exercise-card.done {
+    border-color: var(--accent3);
+    opacity: 0.7;
+  }
+
+  .exercise-card.done .exercise-name { text-decoration: line-through; color: var(--text-muted); }
+
+  .exercise-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    cursor: pointer;
+  }
+
+  .exercise-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 700;
+    width: 20px;
+    flex-shrink: 0;
+  }
+
+  .exercise-info { flex: 1; min-width: 0; }
+
+  .exercise-name {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+    transition: color 0.2s;
+  }
+
+  .exercise-reps {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent2);
+  }
+
+  .check-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .exercise-card.done .check-btn {
+    background: var(--accent3);
+    border-color: var(--accent3);
+    color: #000;
+  }
+
+  .exercise-desc {
+    display: none;
+    padding: 0 14px 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin: 0 14px;
+    margin-bottom: 12px;
+  }
+
+  .exercise-card.expanded .exercise-desc { display: block; }
+
+  /* TIMER */
+  .timer-section {
+    padding: 8px 14px 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .timer-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .timer-num {
+    font-family: var(--mono);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -1px;
+    min-width: 70px;
+  }
+
+  .timer-num.running { color: var(--accent2); }
+  .timer-num.done-color { color: var(--accent3); }
+
+  .timer-progress {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .timer-progress-fill {
+    height: 100%;
+    background: var(--accent2);
+    border-radius: 3px;
+    transition: width 0.1s linear, background 0.3s;
+  }
+
+  .timer-btns {
+    display: flex;
+    gap: 8px;
+  }
+
+  .timer-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .timer-btn:active { transform: scale(0.97); }
+  .timer-btn.start { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+  .timer-btn.stop { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .timer-btn.reset { color: var(--text-muted); }
+
+  /* REP COUNTER */
+  .rep-counter {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .rep-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    flex: 1;
+  }
+
+  .rep-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .rep-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    font-weight: 700;
+  }
+
+  .rep-btn:active { transform: scale(0.9); }
+  .rep-btn.plus { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+  .rep-count {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    min-width: 36px;
+    text-align: center;
+    color: var(--text);
+  }
+
+  .rep-target {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .rep-count.hit { color: var(--accent3); }
+
+  /* WALK SECTION */
+  .walk-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .walk-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .walk-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  .walk-stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .walk-stat-value {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .walk-stat-value.ok { color: var(--accent3); }
+  .walk-stat-value.warn { color: var(--accent); }
+
+  .walk-timer-big {
+    font-family: var(--mono);
+    font-size: 52px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text);
+    letter-spacing: -2px;
+    margin-bottom: 10px;
+    line-height: 1;
+  }
+
+  .walk-timer-big.running { color: var(--accent2); }
+
+  .walk-progress {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+
+  .walk-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent3));
+    border-radius: 4px;
+    transition: width 1s linear;
+  }
+
+  .walk-btns {
+    display: flex;
+    gap: 8px;
+  }
+
+  .walk-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .walk-btn:active { transform: scale(0.97); }
+  .walk-btn.go { background: var(--accent2); color: #fff; }
+  .walk-btn.pause { background: var(--accent); color: #fff; }
+  .walk-btn.stop-walk { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+
+  /* RULES */
+  .rules-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rule-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border-left: 3px solid var(--border);
+  }
+
+  .rule-item.danger { border-left-color: var(--accent); }
+  .rule-item.ok { border-left-color: var(--accent3); }
+  .rule-item.info { border-left-color: var(--accent2); }
+
+  .rule-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .rule-text { font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+  .rule-text strong { color: var(--text); }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0 12px;
+    z-index: 100;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    padding: 4px;
+  }
+
+  .nav-item.active { opacity: 1; }
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 9px; font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+
+  /* PAGE SYSTEM */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* COMPLETE SCREEN */
+  .complete-banner {
+    background: linear-gradient(135deg, #0d2e1a, #0a1f12);
+    border: 1px solid var(--accent3);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .complete-emoji { font-size: 40px; margin-bottom: 8px; }
+  .complete-title { font-family: var(--mono); font-size: 16px; color: var(--accent3); font-weight: 700; margin-bottom: 4px; }
+  .complete-sub { font-size: 13px; color: var(--text-muted); }
+
+  /* STATS PAGE */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+  }
+
+  .stat-card-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .stat-card-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .stat-card-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  /* ANKLE PAGE */
+  .ankle-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+
+  .ankle-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .ankle-reps-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent2);
+    margin-bottom: 12px;
+  }
+
+  .ktw-result {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .ktw-box {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .ktw-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .ktw-value {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent3);
+  }
+
+  .ktw-target { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Reset all btn */
+  .reset-all-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 12px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+
+  .reset-all-btn:active { background: var(--surface2); }
+
+  /* Pulse animation */
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .pulse { animation: pulse-dot 1.5s infinite; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">⚡ RESET · TYG.3</div>
+    <div class="date-badge" id="dateLabel">—</div>
+  </div>
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="mainProgress" style="width:0%"></div>
+  </div>
+  <div class="progress-label">
+    <span id="progressText">0 / 9 ukończonych</span>
+    <span id="progressPct">0%</span>
+  </div>
+</div>
+
+<!-- PAGE: RYTUAŁ -->
+<div class="page active" id="pageRitual">
+<div class="main">
+
+  <!-- COMPLETE BANNER -->
+  <div class="complete-banner" id="completeBanner" style="display:none">
+    <div class="complete-emoji">🔥</div>
+    <div class="complete-title">RYTUAŁ UKOŃCZONY!</div>
+    <div class="complete-sub">Czas na bieżnię. Idź!</div>
+  </div>
+
+  <!-- SEKCJA 1: RYTUAŁ -->
+  <div class="section" id="sec-ritual">
+    <div class="section-header" onclick="toggleSection('sec-ritual')">
+      <div class="section-icon" style="background:#1a2035">🏃</div>
+      <div class="section-title">RYTUAŁ — 7 ćwiczeń</div>
+      <div class="section-meta">~10 min</div>
+      <div class="section-chevron">▼</div>
+    </div>
+    <div class="section-body" id="sec-ritual-body">
+
+      <!-- 1. 90/90 -->
+      <div class="exercise-card" id="ex-1">
+        <div class="exercise-top" onclick="toggleExpand('ex-1')">
+          <div class="exercise-num">01</div>
+          <div class="exercise-info">
+            <div class="exercise-name">90/90 Hip Switches</div>
+            <div class="exercise-reps">6–10 przejść</div>
+          </div>
+          <button class="check-btn" onclick="event.stopPropagation(); toggleDone('ex-1', 0)">✓</button>
+        </div>
+        <div class="exercise-desc">Siądź na podłodze, nogi ugięte po obu stronach w kąt 90°. Powoli obracaj biodra z jednej strony na drugą. Plecy proste, ruch kontrolowany. Poczujesz rozciąganie w biodrach i pośladkach.</div>
+        <div class="rep-counter">
+          <div class="rep-label">PRZEJŚCIA</div>
+          <div class="rep-controls">
+            <button class="rep-btn" onclick="changeRep('ex-1', -1)">−</button>
+            <div class="rep-count" id="rep-ex-1">0</div>
+            <div class="rep-target">/ 8</div>
+            <button class="rep-btn plus" onclick="changeRep('ex-1', 1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Glute Bridge -->
+      <div class="exercise-card" id="ex-2">
+        <div class="exercise-top" onclick="toggleExpand('ex-2')">
+          <div class="exercise-num">02</div>
+          <div class="exercise-info">
+            <div class="exercise-name">Glute Bridge</div>
+            <div class="exercise-reps">10–12 powt. · pauza 2s</div>
+          </div>
+          <button class="check-btn" onclick="event.stopPropagation(); toggleDone('ex-2', 1)">✓</button>
+        </div>
+        <div class="exercise-desc">Połóż się na plecach, kolana ugięte, stopy na podłodze. Napnij pośladki i unieś biodra — tworząc linię od kolan do barków. Pauza 2 sekundy na górze. Powoli w dół. Kontrolujesz, nie zrzucasz.</div>
+        <div class="rep-counter">
+          <div class="rep-label">POWTÓRZENIA</div>
+          <div class="rep-controls">
+            <button class="rep-btn" onclick="changeRep('ex-2', -1)">−</button>
+            <div class="rep-count" id="rep-ex-2">0</div>
+            <div class="rep-target">/ 12</div>
+            <button class="rep-btn plus" onclick="changeRep('ex-2', 1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Dead Bug -->
+      <div class="exercise-card" id="ex-3">
+        <div class="exercise-top" onclick="toggleExpand('ex-3')">
+          <div class="exercise-num">03</div>
+          <div class="exercise-info">
+            <div class="exercise-name">Dead Bug</div>
+            <div class="exercise-reps">6 powt. / stronę</div>
+          </div>
+          <button class="check-btn" onclick="event.stopPropagation(); toggleDone('ex-3', 2)">✓</button>
+        </div>
+        <div class="exercise-desc">Na plecach, ręce wyciągnięte w górę, kolana ugięte pod 90°. Jednocześnie opuszczaj prawą rękę nad głowę i lewą nogę w dół. Wróć. Zmieniaj strony. Lędźwie cały czas przy podłodze — napięty brzuch! Jeśli czujesz 'klik' w biodrze — skróć zakres.</div>
+        <div class="rep-counter">
+          <div class="rep-label">POWT. / STRONĘ</div>
+          <div class="rep-controls">
+            <button class="rep-btn" onclick="changeRep('ex-3', -1)">−</button>
+            <div class="rep-count" id="rep-ex-3">0</div>
+            <div class="rep-target">/ 6</div>
+            <button class="rep-btn plus" onclick="changeRep('ex-3', 1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Squat Hold -->
+      <div class="exercise-card" id="ex-4">
+        <div class="exercise-top" onclick="toggleExpand('ex-4')">
+          <div class="exercise-num">04</div>
+          <div class="exercise-info">
+            <div class="exercise-name">Squat Hold pasywny</div>
+            <div class="exercise-reps">45–60 sekund</div>
+          </div>
+          <button class="check-btn" onclick="event.stopPropagation(); toggleDone('ex-4', 3)">✓</button>
+        </div>
+        <div class="exercise-desc">Głęboki przysiad, pięty na podłodze, ręce złożone przed sobą lub trzymaj się czegoś. Rozluźnij się w tej pozycji — to stretch, nie ćwiczenie siłowe. Oddychaj swobodnie. Napięty brzuch — kontroluj hiperlordozę.</div>
+        <div class="timer-section">
+          <div class="timer-display">
+            <div class="timer-num" id="timer-ex-4">60</div>
+            <div class="timer-progress"><div class="timer-progress-fill" id="timerbar-ex-4" style="width:100%"></div></div>
+          </div>
+          <div class="timer-btns">
+            <button class="timer-btn start" onclick="startTimer('ex-4', 60)">START</button>
+            <button class="timer-btn reset" onclick="resetTimer('ex-4', 60)">RESET</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Cat-Cow -->
+      <div class="exercise-card" id="ex-5">
+        <div class="exercise-top" onclick="toggleExpand('ex-5')">
+          <div class="exercise-num">05</div>
+          <div class="exercise-info">
+            <div class="exercise-name">Cat-Cow</div>
+            <div class="exercise-reps">6–8 powt.</div>
+          </div>
+          <button class="check-btn" onclick="event.stopPropagation(); toggleDone('ex-5', 4)">✓</button>
+        </div>
+        <div class="exercise-desc">Na czworakach. Cat: zaokrąglij plecy w górę jak kot, głowa w dół. Cow: wygiąj plecy w dół, głowa i pupa w górę. Płynny ruch, zsynchronizowany z oddechem. Wdech na cow, wydech na cat.</div>
+        <div class="rep-counter">
+          <div class="rep-label">POWTÓRZENIA</div>
+          <div class="rep-controls">
+            <button class="rep-btn" onclick="changeRep('ex-5', -1)">−</button>
+            <div class="rep-count" id="rep-ex-5">0</div>
+            <div class="rep-target">/ 7</div>
+            <button class="rep-btn plus" onclick="changeRep('ex-5', 1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Plank — 3 serie z timerem -->
+      <div class="exercise-card" id="ex-6">
+        <div class="exercise-top" onclick="toggleExpand('ex-6')">
+          <div class="exercise-num">06</div>
+          <div class="exercise-info">
+            <div class="exercise-name">Plank — przedramiona</div>
+            <div class="exercise-reps">3 × 25s · odpoczynek 20s</div>
+          </div>
+          <button class="check-btn" onclick="event.stopPropagation(); toggleDone('ex-6', 5)">✓</button>
+        </div>
+        <div class="exercise-desc">Oprzyj się na przedramionach i palcach stóp. Ciało w jednej linii — nie podnoś pupy, nie opuszczaj bioder. Napnij brzuch i pośladki. Patrz w dół. Oddychaj! 25s to cel tego tygodnia.</div>
+        <div class="timer-section">
+          <div style="font-family:var(--mono); font-size:10px; color:var(--text-muted); margin-bottom:6px;">
+            SERIA: <span id="plank-set">1</span> / 3
+          </div>
+          <div class="timer-display">
+            <div class="timer-num" id="timer-ex-6">25</div>
+            <div class="timer-progress"><div class="timer-progress-fill" id="timerbar-ex-6" style="width:100%"></div></div>
+          </div>
+          <div class="timer-btns">
+            <button class="timer-btn start" onclick="startPlankTimer()">START</button>
+            <button class="timer-btn reset" onclick="resetPlankTimer()">RESET</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Pompki -->
+      <div class="exercise-card" id="ex-7">
+        <div class="exercise-top" onclick="toggleExpand('ex-7')">
+          <div class="exercise-num">07</div>
+          <div class="exercise-info">
+            <div class="exercise-name">Pompki</div>
+            <div class="exercise-reps">3 × 8 (na kolanach OK)</div>
+          </div>
+          <button class="check-btn" onclick="event.stopPropagation(); toggleDone('ex-7', 6)">✓</button>
+        </div>
+        <div class="exercise-desc">Uchwyty do pompek dają lepszy zakres ruchu — użyj ich! Ciało w linii prostej, łokcie blisko tułowia. Klatka dotyka prawie uchwytów. Na kolanach jest OK — to przygotowanie do pływania, nie konkurs.</div>
+        <div style="padding: 0 14px 12px; border-top: 1px solid var(--border); padding-top: 10px; display: flex; gap: 8px;">
+          <div id="push-s1" onclick="togglePushSeries(1)" style="flex:1; padding:10px; background:var(--surface); border:1px solid var(--border); border-radius:8px; text-align:center; cursor:pointer; font-family:var(--mono); font-size:12px; color:var(--text-muted);">SERIA 1</div>
+          <div id="push-s2" onclick="togglePushSeries(2)" style="flex:1; padding:10px; background:var(--surface); border:1px solid var(--border); border-radius:8px; text-align:center; cursor:pointer; font-family:var(--mono); font-size:12px; color:var(--text-muted);">SERIA 2</div>
+          <div id="push-s3" onclick="togglePushSeries(3)" style="flex:1; padding:10px; background:var(--surface); border:1px solid var(--border); border-radius:8px; text-align:center; cursor:pointer; font-family:var(--mono); font-size:12px; color:var(--text-muted);">SERIA 3</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- PAGE: KOSTKA -->
+<div class="page" id="pageAnkle">
+<div class="main">
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection('sec-ankle')">
+      <div class="section-icon" style="background:#1a2035">🦵</div>
+      <div class="section-title">KOSTKA — ćwiczenia</div>
+      <div class="section-meta">~2 min</div>
+      <div class="section-chevron">▼</div>
+    </div>
+    <div class="section-body" id="sec-ankle-body">
+
+      <!-- Ankle circles -->
+      <div class="ankle-card">
+        <div class="ankle-title">Ankle Circles</div>
+        <div class="ankle-reps-label">10× każdy kierunek · obie nogi</div>
+        <div style="font-size:13px; color:var(--text-muted); line-height:1.6;">Siedź lub stój. Rysuj kółka stopą — najpierw zgodnie z ruchem wskazówek, potem przeciwnie. Powoli, pełny zakres ruchu. Czujesz gdzie jest granica — nie forsuj bólu.</div>
+        <div class="rep-counter" style="padding: 10px 0 0; border-top: 1px solid var(--border); margin-top: 12px;">
+          <div class="rep-label">KÓŁKA (każda noga)</div>
+          <div class="rep-controls">
+            <button class="rep-btn" onclick="changeRep('ankle-circles', -1)">−</button>
+            <div class="rep-count" id="rep-ankle-circles">0</div>
+            <div class="rep-target">/ 10</div>
+            <button class="rep-btn plus" onclick="changeRep('ankle-circles', 1)">+</button>
+          </div>
+        </div>
+        <button class="check-btn" onclick="toggleDone('ankle-card-1', 7)" style="margin-top:10px; width:100%; border-radius:8px; height:36px; font-size:13px; font-family:var(--mono);" id="ankle-card-1-btn">✓ ZROBIONE</button>
+      </div>
+
+      <!-- Knee to wall -->
+      <div class="ankle-card">
+        <div class="ankle-title">Knee-to-Wall</div>
+        <div class="ankle-reps-label">10 powt. · obie nogi</div>
+        <div style="font-size:13px; color:var(--text-muted); line-height:1.6;">Stój tyłem do ściany, postaw stopę ok. 13 cm od ściany. Pchnij kolano w kierunku ściany nie odrywając pięty. To też pomiar tygodniowy.</div>
+
+        <div class="ktw-result">
+          <div class="ktw-box">
+            <div class="ktw-label">LEWA</div>
+            <div class="ktw-value">13 cm</div>
+            <div class="ktw-target">✓ cel osiągnięty!</div>
+          </div>
+          <div class="ktw-box">
+            <div class="ktw-label">PRAWA</div>
+            <div class="ktw-value">14 cm</div>
+            <div class="ktw-target">utrzymać</div>
+          </div>
+        </div>
+
+        <div class="rep-counter" style="padding: 10px 0 0; border-top: 1px solid var(--border); margin-top: 12px;">
+          <div class="rep-label">POWTÓRZENIA</div>
+          <div class="rep-controls">
+            <button class="rep-btn" onclick="changeRep('ktw', -1)">−</button>
+            <div class="rep-count" id="rep-ktw">0</div>
+            <div class="rep-target">/ 10</div>
+            <button class="rep-btn plus" onclick="changeRep('ktw', 1)">+</button>
+          </div>
+        </div>
+        <button class="check-btn" onclick="toggleDone('ankle-card-2', 8)" style="margin-top:10px; width:100%; border-radius:8px; height:36px; font-size:13px; font-family:var(--mono);" id="ankle-card-2-btn">✓ ZROBIONE</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- PAGE: MARSZ -->
+<div class="page" id="pageWalk">
+<div class="main">
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection('sec-walk')">
+      <div class="section-icon" style="background:#1a2035">👟</div>
+      <div class="section-title">MARSZ — 30 min</div>
+      <div class="section-meta">bieżnia / outdoor</div>
+      <div class="section-chevron">▼</div>
+    </div>
+    <div class="section-body" id="sec-walk-body">
+
+      <div class="walk-card">
+        <div class="walk-stats">
+          <div class="walk-stat">
+            <div class="walk-stat-label">TEMPO</div>
+            <div class="walk-stat-value ok">10:00</div>
+            <div style="font-size:10px; color:var(--text-muted);">min/km · baza</div>
+          </div>
+          <div class="walk-stat">
+            <div class="walk-stat-label">TĘTNO MAX</div>
+            <div class="walk-stat-value warn">&lt;115</div>
+            <div style="font-size:10px; color:var(--text-muted);">bpm · regulator</div>
+          </div>
+          <div class="walk-stat">
+            <div class="walk-stat-label">KOŃCÓWKA</div>
+            <div class="walk-stat-value">9:40</div>
+            <div style="font-size:10px; color:var(--text-muted);">min/km · max</div>
+          </div>
+          <div class="walk-stat">
+            <div class="walk-stat-label">DYSTANS</div>
+            <div class="walk-stat-value">~3 km</div>
+            <div style="font-size:10px; color:var(--text-muted);">orientacyjnie</div>
+          </div>
+        </div>
+
+        <div class="walk-timer-big" id="walkTimer">30:00</div>
+        <div class="walk-progress">
+          <div class="walk-progress-fill" id="walkProgress" style="width:0%"></div>
+        </div>
+
+        <div class="walk-btns">
+          <button class="walk-btn go" id="walkStartBtn" onclick="toggleWalk()">▶ START</button>
+          <button class="walk-btn stop-walk" onclick="resetWalk()">RESET</button>
+        </div>
+      </div>
+
+      <div class="rules-grid">
+        <div class="rule-item danger">
+          <div class="rule-icon">⚠️</div>
+          <div class="rule-text"><strong>Tętno >115 bpm</strong> — zwolnij natychmiast, niezależnie od tempa</div>
+        </div>
+        <div class="rule-item ok">
+          <div class="rule-icon">✅</div>
+          <div class="rule-text"><strong>Napnij brzuch</strong> przez cały marsz — hiperlordoza</div>
+        </div>
+        <div class="rule-item info">
+          <div class="rule-icon">👟</div>
+          <div class="rule-text"><strong>Runner's lock</strong> — oba buty, szczególnie lewy</div>
+        </div>
+        <div class="rule-item danger">
+          <div class="rule-icon">🛑</div>
+          <div class="rule-text"><strong>Ból >3/10</strong> = STOP i raport natychmiast</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- PAGE: ZASADY -->
+<div class="page" id="pageRules">
+<div class="main">
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-label">WAGA</div>
+      <div class="stat-card-value" style="color:var(--accent3)">76,4</div>
+      <div class="stat-card-sub">kg · cel 74–75</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">KtW LEWA</div>
+      <div class="stat-card-value" style="color:var(--accent3)">13 cm</div>
+      <div class="stat-card-sub">✓ cel osiągnięty!</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">FAZA</div>
+      <div class="stat-card-value" style="color:var(--accent2); font-size:14px">RESET</div>
+      <div class="stat-card-sub">tydzień 3 / 3</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">DO STARTU</div>
+      <div class="stat-card-value" id="daysLeft" style="color:var(--accent)">—</div>
+      <div class="stat-card-sub">dni · Sieraków</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection('sec-rules')">
+      <div class="section-icon" style="background:#1a2035">📋</div>
+      <div class="section-title">ZASADY ŻELAZNE</div>
+      <div class="section-meta">zawsze</div>
+      <div class="section-chevron">▼</div>
+    </div>
+    <div class="section-body" id="sec-rules-body">
+      <div class="rules-grid">
+        <div class="rule-item danger"><div class="rule-icon">😴</div><div class="rule-text"><strong>Sen > trening</strong> — zawsze, bez wyjątków</div></div>
+        <div class="rule-item danger"><div class="rule-icon">🚫</div><div class="rule-text"><strong>BB &lt;50 lub sen &lt;6h</strong> = dzień off od marszu, bez negocjacji</div></div>
+        <div class="rule-item danger"><div class="rule-icon">🍺</div><div class="rule-text"><strong>Alkohol = 0</strong> do startu. Piwo bezalkoholowe — OK</div></div>
+        <div class="rule-item ok"><div class="rule-icon">🌙</div><div class="rule-text"><strong>Ekrany off 23:15</strong>, konsola hard stop 23:00</div></div>
+        <div class="rule-item info"><div class="rule-icon">☕</div><div class="rule-text"><strong>Ostatnia kawa</strong> do 14:00</div></div>
+        <div class="rule-item ok"><div class="rule-icon">🍽️</div><div class="rule-text"><strong>Kolacja minimum 3h</strong> przed snem. Zero dojadania po 19:00</div></div>
+        <div class="rule-item danger"><div class="rule-icon">🛑</div><div class="rule-text"><strong>Ból >3/10</strong> = STOP i natychmiastowy raport do trenera</div></div>
+        <div class="rule-item danger"><div class="rule-icon">🏥</div><div class="rule-text"><strong>Ból >4/10 lub obrzęk kostki</strong> = ortopeda bez dyskusji</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header" onclick="toggleSection('sec-calendar')">
+      <div class="section-icon" style="background:#1a2035">📅</div>
+      <div class="section-title">KALENDARZ STARTÓW</div>
+      <div class="section-meta">2026</div>
+      <div class="section-chevron">▼</div>
+    </div>
+    <div class="section-body" id="sec-calendar-body">
+      <div class="rules-grid">
+        <div class="rule-item info"><div class="rule-icon">🏃</div><div class="rule-text"><strong>30.03.2026</strong> — Niebieska Fala, Poznań, 10 km<br><span style="font-size:11px">Cel: meta zdrowy, bez bólu. Czas bez znaczenia.</span></div></div>
+        <div class="rule-item info"><div class="rule-icon">🌍</div><div class="rule-text"><strong>10.05.2026</strong> — Wings For Life<br><span style="font-size:11px">Cel: wytrzymałość, sprawdzian formy</span></div></div>
+        <div class="rule-item danger"><div class="rule-icon">🏊</div><div class="rule-text"><strong>01.06.2026</strong> — JBL Triathlon Sieraków 1/4 IM<br><span style="font-size:11px">CEL GŁÓWNY. Start 11:00. Ukończyć zdrowo.</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="reset-all-btn" onclick="resetAll()">↺ RESETUJ DZISIEJSZY POSTĘP</button>
+
+</div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-item active" id="nav-ritual" onclick="showPage('pageRitual', 'nav-ritual')">
+    <div class="nav-icon">🏋️</div>
+    <div class="nav-label">Rytuał</div>
+  </div>
+  <div class="nav-item" id="nav-ankle" onclick="showPage('pageAnkle', 'nav-ankle')">
+    <div class="nav-icon">🦵</div>
+    <div class="nav-label">Kostka</div>
+  </div>
+  <div class="nav-item" id="nav-walk" onclick="showPage('pageWalk', 'nav-walk')">
+    <div class="nav-icon">👟</div>
+    <div class="nav-label">Marsz</div>
+  </div>
+  <div class="nav-item" id="nav-rules" onclick="showPage('pageRules', 'nav-rules')">
+    <div class="nav-icon">📋</div>
+    <div class="nav-label">Zasady</div>
+  </div>
+</div>
+
+<script>
+// STATE
+const TOTAL = 9;
+let done = new Array(TOTAL).fill(false);
+let reps = {};
+let timers = {};
+let plankSet = 1;
+let plankSeries = [false, false, false];
+let walkInterval = null;
+let walkSeconds = 0;
+let walkRunning = false;
+const WALK_TOTAL = 30 * 60;
+
+// INIT
+window.onload = function() {
+  updateDate();
+  updateDaysLeft();
+  updateProgress();
+};
+
+function updateDate() {
+  const now = new Date();
+  const days = ['Ndz','Pon','Wt','Śr','Czw','Pt','Sob'];
+  const months = ['sty','lut','mar','kwi','maj','cze','lip','sie','wrz','paź','lis','gru'];
+  document.getElementById('dateLabel').textContent =
+    days[now.getDay()] + ' ' + now.getDate() + ' ' + months[now.getMonth()];
+}
+
+function updateDaysLeft() {
+  const target = new Date('2026-06-01');
+  const now = new Date();
+  const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+  document.getElementById('daysLeft').textContent = diff;
+}
+
+function updateProgress() {
+  const count = done.filter(Boolean).length;
+  const pct = Math.round(count / TOTAL * 100);
+  document.getElementById('mainProgress').style.width = pct + '%';
+  document.getElementById('progressText').textContent = count + ' / ' + TOTAL + ' ukończonych';
+  document.getElementById('progressPct').textContent = pct + '%';
+  if (count === TOTAL) {
+    document.getElementById('completeBanner').style.display = 'block';
+  }
+}
+
+function showPage(pageId, navId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  document.getElementById(navId).classList.add('active');
+}
+
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+function toggleExpand(id) {
+  document.getElementById(id).classList.toggle('expanded');
+}
+
+function toggleDone(id, idx) {
+  const card = document.getElementById(id);
+  if (!card) return;
+  done[idx] = !done[idx];
+  if (done[idx]) {
+    card.classList.add('done');
+  } else {
+    card.classList.remove('done');
+  }
+  // For ankle buttons
+  const btn = document.getElementById(id + '-btn');
+  if (btn) {
+    btn.style.background = done[idx] ? 'var(--accent3)' : 'var(--surface)';
+    btn.style.color = done[idx] ? '#000' : 'var(--text-muted)';
+  }
+  updateProgress();
+}
+
+function changeRep(id, delta) {
+  if (!reps[id]) reps[id] = 0;
+  reps[id] = Math.max(0, reps[id] + delta);
+  const el = document.getElementById('rep-' + id);
+  if (el) el.textContent = reps[id];
+}
+
+// TIMER
+function startTimer(id, total) {
+  if (timers[id] && timers[id].running) return;
+  if (!timers[id]) timers[id] = { remaining: total, total, running: false };
+  timers[id].running = true;
+
+  const numEl = document.getElementById('timer-' + id);
+  const barEl = document.getElementById('timerbar-' + id);
+  numEl.classList.add('running');
+
+  timers[id].interval = setInterval(() => {
+    timers[id].remaining--;
+    numEl.textContent = timers[id].remaining;
+    barEl.style.width = (timers[id].remaining / timers[id].total * 100) + '%';
+    if (timers[id].remaining <= 0) {
+      clearInterval(timers[id].interval);
+      timers[id].running = false;
+      numEl.classList.remove('running');
+      numEl.classList.add('done-color');
+      numEl.textContent = '✓';
+      barEl.style.width = '0%';
+      barEl.style.background = 'var(--accent3)';
+    }
+  }, 1000);
+}
+
+function resetTimer(id, total) {
+  if (timers[id]) {
+    clearInterval(timers[id].interval);
+    timers[id] = { remaining: total, total, running: false };
+  }
+  const numEl = document.getElementById('timer-' + id);
+  const barEl = document.getElementById('timerbar-' + id);
+  numEl.textContent = total;
+  numEl.className = 'timer-num';
+  barEl.style.width = '100%';
+  barEl.style.background = 'var(--accent2)';
+}
+
+// PLANK TIMER
+let plankInterval = null;
+let plankRemaining = 25;
+let plankRunning = false;
+let plankPhase = 'work'; // work | rest
+
+function startPlankTimer() {
+  if (plankRunning) return;
+  plankRunning = true;
+  const numEl = document.getElementById('timer-ex-6');
+  const barEl = document.getElementById('timerbar-ex-6');
+  numEl.classList.add('running');
+
+  const duration = plankPhase === 'work' ? 25 : 20;
+
+  plankInterval = setInterval(() => {
+    plankRemaining--;
+    numEl.textContent = plankRemaining;
+    barEl.style.width = (plankRemaining / duration * 100) + '%';
+
+    if (plankRemaining <= 0) {
+      clearInterval(plankInterval);
+      plankRunning = false;
+
+      if (plankPhase === 'work') {
+        plankSeries[plankSet - 1] = true;
+        numEl.classList.remove('running');
+        numEl.classList.add('done-color');
+
+        if (plankSet < 3) {
+          // rest phase
+          plankPhase = 'rest';
+          plankRemaining = 20;
+          numEl.textContent = '20s REST';
+          barEl.style.background = 'var(--accent)';
+          barEl.style.width = '100%';
+          setTimeout(() => { startPlankTimer(); }, 500);
+        } else {
+          numEl.textContent = '✓✓✓';
+          barEl.style.width = '0%';
+          barEl.style.background = 'var(--accent3)';
+          document.getElementById('plank-set').textContent = '3';
+        }
+      } else {
+        // end of rest, next work set
+        plankPhase = 'work';
+        plankSet++;
+        plankRemaining = 25;
+        document.getElementById('plank-set').textContent = plankSet;
+        numEl.classList.remove('running', 'done-color');
+        numEl.textContent = '25';
+        barEl.style.width = '100%';
+        barEl.style.background = 'var(--accent2)';
+      }
+    }
+  }, 1000);
+}
+
+function resetPlankTimer() {
+  clearInterval(plankInterval);
+  plankRunning = false;
+  plankPhase = 'work';
+  plankSet = 1;
+  plankRemaining = 25;
+  plankSeries = [false, false, false];
+  const numEl = document.getElementById('timer-ex-6');
+  const barEl = document.getElementById('timerbar-ex-6');
+  numEl.textContent = '25';
+  numEl.className = 'timer-num';
+  barEl.style.width = '100%';
+  barEl.style.background = 'var(--accent2)';
+  document.getElementById('plank-set').textContent = '1';
+}
+
+// PUSHUP SERIES
+function togglePushSeries(n) {
+  const el = document.getElementById('push-s' + n);
+  const active = el.style.background === 'var(--accent3)' || el.style.background === 'rgb(46, 203, 113)';
+  if (!active) {
+    el.style.background = 'var(--accent3)';
+    el.style.borderColor = 'var(--accent3)';
+    el.style.color = '#000';
+  } else {
+    el.style.background = 'var(--surface)';
+    el.style.borderColor = 'var(--border)';
+    el.style.color = 'var(--text-muted)';
+  }
+}
+
+// WALK TIMER
+function toggleWalk() {
+  if (walkRunning) {
+    clearInterval(walkInterval);
+    walkRunning = false;
+    document.getElementById('walkStartBtn').textContent = '▶ WZNÓW';
+    document.getElementById('walkStartBtn').className = 'walk-btn go';
+  } else {
+    walkRunning = true;
+    document.getElementById('walkStartBtn').textContent = '⏸ PAUZA';
+    document.getElementById('walkStartBtn').className = 'walk-btn pause';
+    walkInterval = setInterval(() => {
+      walkSeconds++;
+      const rem = WALK_TOTAL - walkSeconds;
+      if (rem <= 0) {
+        clearInterval(walkInterval);
+        walkRunning = false;
+        document.getElementById('walkTimer').textContent = 'GOTOWE!';
+        document.getElementById('walkTimer').classList.add('running');
+        document.getElementById('walkProgress').style.width = '100%';
+        document.getElementById('walkStartBtn').textContent = '✓ MARSZ ZALICZONY';
+        return;
+      }
+      const mins = Math.floor(rem / 60);
+      const secs = rem % 60;
+      document.getElementById('walkTimer').textContent =
+        String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+      document.getElementById('walkTimer').classList.add('running');
+      document.getElementById('walkProgress').style.width = (walkSeconds / WALK_TOTAL * 100) + '%';
+    }, 1000);
+  }
+}
+
+function resetWalk() {
+  clearInterval(walkInterval);
+  walkRunning = false;
+  walkSeconds = 0;
+  document.getElementById('walkTimer').textContent = '30:00';
+  document.getElementById('walkTimer').className = 'walk-timer-big';
+  document.getElementById('walkProgress').style.width = '0%';
+  document.getElementById('walkStartBtn').textContent = '▶ START';
+  document.getElementById('walkStartBtn').className = 'walk-btn go';
+}
+
+function resetAll() {
+  done = new Array(TOTAL).fill(false);
+  reps = {};
+  document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('done'));
+  document.querySelectorAll('.rep-count').forEach(el => el.textContent = '0');
+  resetTimer('ex-4', 60);
+  resetPlankTimer();
+  resetWalk();
+  document.getElementById('completeBanner').style.display = 'none';
+  // ankle btns
+  ['ankle-card-1-btn','ankle-card-2-btn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.background='var(--surface)'; el.style.color='var(--text-muted)'; }
+  });
+  updateProgress();
+}
+</script>
+</body>
+</html>

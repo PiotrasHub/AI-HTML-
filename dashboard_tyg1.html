@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏊‍♂️🚴‍♂️🏃‍♂️ Piotr — Dashboard Triathlon Sieraków 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e4e4e7;
+    --muted: #9ca3af;
+    --accent: #3b82f6;
+    --green: #22c55e;
+    --red: #ef4444;
+    --orange: #f59e0b;
+    --purple: #a855f7;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .header {
+    text-align: center;
+    padding: 20px 0 10px;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .header .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .countdown {
+    background: linear-gradient(135deg, #1e3a5f, #1a2744);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin: 16px 0;
+    border: 1px solid #2a4a6f;
+  }
+  .countdown .days {
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .countdown .label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .countdown .event {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 8px;
+    color: var(--text);
+  }
+  .phase-bar {
+    display: flex;
+    gap: 3px;
+    margin: 16px 0;
+    height: 32px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .phase-bar .phase {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .phase-bar .phase.reset { background: var(--accent); flex: 3; }
+  .phase-bar .phase.fundament { background: var(--purple); flex: 3; opacity: 0.4; }
+  .phase-bar .phase.budowa { background: var(--orange); flex: 4; opacity: 0.4; }
+  .phase-bar .phase.specyfika { background: var(--red); flex: 4; opacity: 0.4; }
+  .phase-bar .phase.taper { background: var(--green); flex: 2; opacity: 0.4; }
+  .phase-indicator {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .phase-indicator strong {
+    color: var(--accent);
+  }
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .kpi .label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .kpi .value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .kpi .delta {
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 600;
+  }
+  .kpi .delta.good { color: var(--green); }
+  .kpi .delta.bad { color: var(--red); }
+  .kpi .delta.neutral { color: var(--muted); }
+  .kpi.wide {
+    grid-column: 1 / -1;
+  }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 24px 0 12px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .chart-card h3 {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+  .chart-card canvas {
+    max-height: 200px;
+  }
+  .streak-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .streak-bar .streak-label {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .streak-bar .streak-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--green);
+  }
+  .checklist {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 10px 0;
+  }
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .checklist-item .dot.done { background: var(--green); }
+  .checklist-item .dot.pending { background: var(--orange); }
+  .checklist-item .dot.fail { background: var(--red); }
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin: 10px 0;
+  }
+  .week-grid .day-cell {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 11px;
+  }
+  .week-grid .day-cell .day-label {
+    color: var(--muted);
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .week-grid .day-cell .day-icon {
+    font-size: 16px;
+  }
+  .rules-card {
+    background: linear-gradient(135deg, #1c1416, #1a1d27);
+    border: 1px solid #3a2020;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 10px 0;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .rules-card strong {
+    color: var(--red);
+  }
+  .footer {
+    text-align: center;
+    padding: 24px 0 12px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .diet-badge {
+    display: inline-block;
+    background: #1a2e1a;
+    color: var(--green);
+    border: 1px solid #2a4a2a;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏊‍♂️🚴‍♂️🏃‍♂️ TRIATHLON SIERAKÓW</h1>
+  <div class="subtitle">JBL 1/4 Ironman — 01.06.2026</div>
+</div>
+
+<div class="countdown">
+  <div class="days" id="countdown-days">106</div>
+  <div class="label">dni do startu</div>
+  <div class="event">0,95 km swim → 45 km bike → 10,55 km run</div>
+</div>
+
+<div class="phase-bar">
+  <div class="phase reset">RESET</div>
+  <div class="phase fundament">FUND.</div>
+  <div class="phase budowa">BUDOWA</div>
+  <div class="phase specyfika">SPECYF.</div>
+  <div class="phase taper">TAPER</div>
+</div>
+<div class="phase-indicator">Aktualnie: <strong>RESET — Tydzień 1/3</strong> (zakończony)</div>
+
+<!-- KPI Grid -->
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="label">Waga</div>
+    <div class="value">76,5<span style="font-size:16px;color:var(--muted)"> kg</span></div>
+    <div class="delta good">▼ 2,7 kg od startu</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Cel wagi</div>
+    <div class="value">74-75<span style="font-size:16px;color:var(--muted)"> kg</span></div>
+    <div class="delta neutral">zostało ~1,5-2,5 kg</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Knee-to-Wall L</div>
+    <div class="value">12<span style="font-size:16px;color:var(--muted)"> cm</span></div>
+    <div class="delta good">▲ +1,5 cm (cel: 13)</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Knee-to-Wall P</div>
+    <div class="value">14<span style="font-size:16px;color:var(--muted)"> cm</span></div>
+    <div class="delta good">✓ norma</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Tłuszcz</div>
+    <div class="value">24,2<span style="font-size:16px;color:var(--muted)">%</span></div>
+    <div class="delta good">▼ 0,4% od startu</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Mięśnie</div>
+    <div class="value">31,1<span style="font-size:16px;color:var(--muted)"> kg</span></div>
+    <div class="delta bad">▼ 0,4 kg — pilnuj białka</div>
+  </div>
+  <div class="kpi wide">
+    <div class="label">Ocena tygodnia 1</div>
+    <div class="value">4<span style="font-size:16px;color:var(--muted)"> / 5</span></div>
+    <div class="delta good">Solidnie — system działa, sen do korekty</div>
+  </div>
+</div>
+
+<!-- Obwody -->
+<div class="section-title">📏 Obwody — baseline tyg. 1</div>
+<div class="kpi-grid">
+  <div class="kpi">
+    <div class="label">Pas (pępek)</div>
+    <div class="value">89,9<span style="font-size:16px;color:var(--muted)"> cm</span></div>
+  </div>
+  <div class="kpi">
+    <div class="label">Biodra</div>
+    <div class="value">96,2<span style="font-size:16px;color:var(--muted)"> cm</span></div>
+  </div>
+  <div class="kpi">
+    <div class="label">Klatka</div>
+    <div class="value">100,9<span style="font-size:16px;color:var(--muted)"> cm</span></div>
+  </div>
+  <div class="kpi">
+    <div class="label">Udo L</div>
+    <div class="value">51,5<span style="font-size:16px;color:var(--muted)"> cm</span></div>
+  </div>
+  <div class="kpi">
+    <div class="label">Udo P</div>
+    <div class="value">52,6<span style="font-size:16px;color:var(--muted)"> cm</span></div>
+  </div>
+  <div class="kpi">
+    <div class="label">Biceps L</div>
+    <div class="value">34,1<span style="font-size:16px;color:var(--muted)"> cm</span></div>
+  </div>
+  <div class="kpi">
+    <div class="label">Biceps P</div>
+    <div class="value">34,4<span style="font-size:16px;color:var(--muted)"> cm</span></div>
+  </div>
+</div>
+
+<!-- Streaks -->
+<div class="section-title">🔥 Streaki</div>
+<div class="streak-bar">
+  <span class="streak-label">🚫 Alkohol zero</span>
+  <span class="streak-value">7 dni</span>
+</div>
+<div class="streak-bar">
+  <span class="streak-label">🏋️ Rytuał poranny</span>
+  <span class="streak-value">7/7 dni</span>
+</div>
+<div class="streak-bar">
+  <span class="streak-label">🚶 Marsz 30min</span>
+  <span class="streak-value">7/7 dni</span>
+</div>
+
+<!-- Week 1 overview -->
+<div class="section-title">📅 Tydzień 1 — przegląd</div>
+<div class="week-grid">
+  <div class="day-cell">
+    <div class="day-label">Pon</div>
+    <div class="day-icon">⚡</div>
+  </div>
+  <div class="day-cell">
+    <div class="day-label">Wt</div>
+    <div class="day-icon">✅</div>
+  </div>
+  <div class="day-cell">
+    <div class="day-label">Śr</div>
+    <div class="day-icon">✅</div>
+  </div>
+  <div class="day-cell">
+    <div class="day-label">Czw</div>
+    <div class="day-icon">✅</div>
+  </div>
+  <div class="day-cell">
+    <div class="day-label">Pt</div>
+    <div class="day-icon">✅</div>
+  </div>
+  <div class="day-cell">
+    <div class="day-label">Sob</div>
+    <div class="day-icon">⚠️</div>
+  </div>
+  <div class="day-cell">
+    <div class="day-label">Ndz</div>
+    <div class="day-icon">✅</div>
+  </div>
+</div>
+<div style="font-size:11px;color:var(--muted);padding:0 4px;">
+  ✅ = rytuał + marsz | ⚡ = start resetu | ⚠️ = sen regresja 02:58
+</div>
+
+<!-- Dieta -->
+<div class="section-title">🍽️ Dieta</div>
+<div class="streak-bar">
+  <span class="streak-label">Kuchnia Vikinga — FODMAP</span>
+  <span class="diet-badge">2200 kcal · 4 posiłki · od 18.02</span>
+</div>
+
+<!-- Charts -->
+<div class="section-title">📈 Wykresy</div>
+
+<div class="chart-card">
+  <h3>Waga (kg)</h3>
+  <canvas id="chartWeight"></canvas>
+</div>
+
+<div class="chart-card">
+  <h3>Pora zasypiania</h3>
+  <canvas id="chartSleep"></canvas>
+</div>
+
+<div class="chart-card">
+  <h3>Body Battery (max dzienny)</h3>
+  <canvas id="chartBB"></canvas>
+</div>
+
+<div class="chart-card">
+  <h3>Tempo marszu (min/km)</h3>
+  <canvas id="chartPace"></canvas>
+</div>
+
+<div class="chart-card">
+  <h3>Knee-to-Wall — lewa kostka (cm)</h3>
+  <canvas id="chartKtW"></canvas>
+</div>
+
+<!-- Zasady -->
+<div class="section-title">⚠️ Zasady żelazne</div>
+<div class="rules-card">
+  <strong>Sen > trening</strong> (zawsze)<br>
+  <strong>Jelita > ambicje</strong> (zawsze)<br>
+  <strong>Alkohol = 0</strong> (do startu)<br>
+  <strong>Jedzenie po 19:00 = 0</strong><br>
+  <strong>Ekrany off 23:15</strong>, konsola hard stop 23:00<br>
+  <strong>Kawa do 14:00</strong><br>
+  <strong>Ból >3/10 = STOP</strong><br>
+  <strong>Max tempo RESET: 9:41/km</strong>
+</div>
+
+<!-- Pending -->
+<div class="section-title">📋 Plan tydzień 2 (16-22.02)</div>
+<div class="checklist">
+  <div class="checklist-item"><div class="dot pending"></div>Rytuał rozbudowany: +plank 3×20s +pompki 3×8</div>
+  <div class="checklist-item"><div class="dot pending"></div>Marsz: bazowe 10:00/km, końcówka max 9:40/km, HR śr. <115</div>
+  <div class="checklist-item"><div class="dot pending"></div>17-18.02: Warszawa — marsz outdoor + rytuał w pokoju</div>
+  <div class="checklist-item"><div class="dot pending"></div>18.02: Start diety FODMAP 2200 kcal</div>
+  <div class="checklist-item"><div class="dot pending"></div>21.02: Parapetówka — ZERO alkoholu</div>
+  <div class="checklist-item"><div class="dot pending"></div>Sen: cel zasypianie przed 01:00, cofać -30 min/dzień</div>
+  <div class="checklist-item"><div class="dot pending"></div>Zakup Thorne Magnesium Bisglycinate</div>
+</div>
+
+<div class="footer">
+  Dashboard wygenerowany 15.02.2026 · Tydzień 1 RESET<br>
+  JBL Triathlon Sieraków · 01.06.2026
+</div>
+
+<script>
+const chartDefaults = {
+  responsive: true,
+  maintainAspectRatio: true,
+  plugins: {
+    legend: { display: false },
+  },
+  scales: {
+    x: {
+      ticks: { color: '#9ca3af', font: { size: 10 } },
+      grid: { color: '#2a2d3a' }
+    },
+    y: {
+      ticks: { color: '#9ca3af', font: { size: 10 } },
+      grid: { color: '#2a2d3a' }
+    }
+  }
+};
+
+// Weight chart
+new Chart(document.getElementById('chartWeight'), {
+  type: 'line',
+  data: {
+    labels: ['9.02\n(bazowa)', '15.02\n(tyg.1)', 'Cel'],
+    datasets: [{
+      data: [79.2, 76.5, null],
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59,130,246,0.1)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 6,
+      pointBackgroundColor: ['#3b82f6', '#3b82f6', null],
+      borderWidth: 2,
+    }, {
+      data: [74.5, 74.5, 74.5],
+      borderColor: '#22c55e',
+      borderDash: [5, 5],
+      pointRadius: 0,
+      borderWidth: 1,
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    scales: {
+      ...chartDefaults.scales,
+      y: { ...chartDefaults.scales.y, min: 72, max: 81 }
+    }
+  }
+});
+
+// Sleep time chart (as hours, where 24 = midnight, 25 = 1:00 AM, etc.)
+new Chart(document.getElementById('chartSleep'), {
+  type: 'bar',
+  data: {
+    labels: ['Wt 10', 'Śr 11', 'Czw 12', 'Pt 13', 'Sob 14'],
+    datasets: [{
+      data: [2.02, 1.5, 1.32, 1.65, 2.97],
+      backgroundColor: ctx => {
+        const v = [2.02, 1.5, 1.32, 1.65, 2.97];
+        const i = ctx.dataIndex;
+        return v[i] > 2 ? '#ef4444' : v[i] > 1.5 ? '#f59e0b' : '#22c55e';
+      },
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    scales: {
+      ...chartDefaults.scales,
+      y: {
+        ...chartDefaults.scales.y,
+        min: 0, max: 4,
+        ticks: {
+          color: '#9ca3af', font: { size: 10 },
+          callback: v => {
+            const h = Math.floor(v);
+            const m = Math.round((v - h) * 60);
+            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+          }
+        }
+      }
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const v = ctx.raw;
+            const h = Math.floor(v);
+            const m = Math.round((v - h) * 60);
+            return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+          }
+        }
+      }
+    }
+  }
+});
+
+// Body Battery chart
+new Chart(document.getElementById('chartBB'), {
+  type: 'line',
+  data: {
+    labels: ['Pre-1', 'Pre-2', 'Pon 9', 'Wt 10', 'Śr 11', 'Czw 12', 'Sob 14'],
+    datasets: [{
+      data: [24, 58, 80, 76, 80, 86, 69],
+      borderColor: '#a855f7',
+      backgroundColor: 'rgba(168,85,247,0.1)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 5,
+      pointBackgroundColor: '#a855f7',
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    scales: {
+      ...chartDefaults.scales,
+      y: { ...chartDefaults.scales.y, min: 0, max: 100 }
+    }
+  }
+});
+
+// Pace chart
+new Chart(document.getElementById('chartPace'), {
+  type: 'line',
+  data: {
+    labels: ['Wt 10', 'Śr 11', 'Czw 12', 'Pt 13', 'Sob 14', 'Ndz 15'],
+    datasets: [{
+      data: [10.80, 10.48, 10.17, 10.43, 9.68, 9.72],
+      borderColor: '#f59e0b',
+      backgroundColor: 'rgba(245,158,11,0.1)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 5,
+      pointBackgroundColor: '#f59e0b',
+      borderWidth: 2,
+    }, {
+      data: [9.68, 9.68, 9.68, 9.68, 9.68, 9.68],
+      borderColor: '#ef4444',
+      borderDash: [5, 5],
+      pointRadius: 0,
+      borderWidth: 1,
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    scales: {
+      ...chartDefaults.scales,
+      y: {
+        ...chartDefaults.scales.y,
+        reverse: true,
+        min: 9,
+        max: 11,
+        ticks: {
+          color: '#9ca3af', font: { size: 10 },
+          callback: v => {
+            const m = Math.floor(v);
+            const s = Math.round((v - m) * 60);
+            return `${m}:${s.toString().padStart(2,'0')}`;
+          }
+        }
+      }
+    },
+    plugins: {
+      legend: { display: false },
+    }
+  }
+});
+
+// Knee to Wall chart
+new Chart(document.getElementById('chartKtW'), {
+  type: 'line',
+  data: {
+    labels: ['Bazowy\n10.02', 'Tyg.1\n15.02', 'Cel'],
+    datasets: [{
+      data: [10.5, 12, null],
+      borderColor: '#22c55e',
+      backgroundColor: 'rgba(34,197,94,0.1)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 6,
+      pointBackgroundColor: '#22c55e',
+      borderWidth: 2,
+    }, {
+      data: [13, 13, 13],
+      borderColor: '#f59e0b',
+      borderDash: [5, 5],
+      pointRadius: 0,
+      borderWidth: 1,
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    scales: {
+      ...chartDefaults.scales,
+      y: { ...chartDefaults.scales.y, min: 9, max: 15 }
+    }
+  }
+});
+
+// Countdown calculator
+const startDate = new Date('2026-06-01T11:00:00');
+const now = new Date();
+const diffDays = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
+document.getElementById('countdown-days').textContent = diffDays;
+</script>
+
+</body>
+</html>
